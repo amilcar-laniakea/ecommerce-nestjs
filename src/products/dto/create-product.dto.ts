@@ -1,4 +1,6 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
+import { IsUnique } from '../utils/is-unique-array';
 
 export class CreateProductDto {
   @IsString()
@@ -25,11 +27,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   stock: number;
 
-  @IsString()
-  @IsNotEmpty()
-  category: string;
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  @IsMongoId({ each: true })
+  @IsUnique({ message: 'Categories must be unique' })
+  categories: Types.ObjectId[];
 
   @IsString()
   @IsOptional()
-  thumbnail?: string;
+  thumbnail?: string | null;
 }

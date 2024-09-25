@@ -10,6 +10,7 @@ import {
   Param,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,16 +22,35 @@ import { productErrorCodes } from './constants/error-messages';
 import { ParseObjectIdNumberPipe } from 'src/common/pipes/parse-object-id-number.pipe';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-object-id.pipe';
 import { QueryOptionsProductDto } from './dto/query-options-product.dto';
+import { CategoriesService } from 'src/categories/categories.service';
+import { Types } from 'mongoose';
 
 @Controller('api/products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly categoriesService: CategoriesService,
+  ) {}
 
   @Post()
   async create(@Body() body: CreateProductDto, @Req() request: Request) {
     try {
+      const categoriesArray = Array.isArray(body.categories) ? body.categories : [body.categories];
+      const errors = [];
+
+      const promises = categoriesArray.map(async (categoryId: Types.ObjectId) => {
+        const result = await this.categoriesService.findById(categoryId);
+        if (!result) errors.push(categoryId);
+      });
+
+      await Promise.allSettled(promises);
+
+      if (errors.length > 0) {
+        throw new BadRequestException(`Categories not found for IDs: ${errors.join(', ')}`);
+      }
+
       const response = await this.productsService.create(body);
-      return ApiResponse.success({
+      return ApiResponse.create({
         data: response,
         message: productSuccessCodes.SUCCESS_CREATE,
         customCode: customSuccessCodes.ResourceCreated,

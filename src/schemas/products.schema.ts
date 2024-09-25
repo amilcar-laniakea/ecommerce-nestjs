@@ -1,4 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Categories } from './categories.schema';
+import { Types } from 'mongoose';
 // import { HydratedDocument } from 'mongoose';
 
 // export type TaskDocument = HydratedDocument<Task>;
@@ -26,11 +28,11 @@ export class Products {
   @Prop({ default: 0, required: true })
   stock: number;
 
-  @Prop({ required: true })
-  category: string;
+  @Prop({ type: [Types.ObjectId], ref: Categories.name, required: true })
+  categories: Types.ObjectId[];
 
-  @Prop({ trim: true })
-  thumbnail: string;
+  @Prop({ trim: true, default: null })
+  thumbnail: string | null;
 }
 
 export const ProductsSchema = SchemaFactory.createForClass(Products);

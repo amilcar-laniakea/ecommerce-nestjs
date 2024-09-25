@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Products } from 'src/schemas/products.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -20,7 +20,10 @@ export class ProductsService {
   constructor(@InjectModel(Products.name) private productModel: Model<Products>) {}
 
   async create(createProductDto: CreateProductDto): Promise<Products> {
-    const newProduct = new this.productModel(createProductDto);
+    const newProduct = new this.productModel({
+      ...createProductDto,
+      categories: createProductDto.categories.map((category: Types.ObjectId) => new Types.ObjectId(category)),
+    });
     return newProduct.save();
   }
 
@@ -39,6 +42,7 @@ export class ProductsService {
 
     const products = await this.productModel
       .find(query)
+      .populate('categories', 'name code thumbnail')
       .sort(sortOption)
       .skip((page - 1) * limit)
       .limit(limit)
@@ -57,27 +61,27 @@ export class ProductsService {
   }
 
   async findById(id: string): Promise<Products> {
-    const product = await this.productModel.findById(id).select('-__v');
+    const product = await this.productModel.findById(id).populate('categories', 'name code thumbnail');
     return product;
   }
 
   async findOne(code: number): Promise<Products> {
-    const product = await this.productModel.findOne({ code }).select('-__v');
+    const product = (await this.productModel.findOne({ code })).populate('categories', 'name code thumbnail');
     return product;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    const updatedProduct = await this.productModel.findByIdAndUpdate(id, updateProductDto, { new: true }).select('-__v');
+    const updatedProduct = await this.productModel.findByIdAndUpdate(id, updateProductDto, { new: true });
     return updatedProduct;
   }
 
   async removeById(id: string) {
-    const removedProduct = await this.productModel.findByIdAndDelete(id).select('-__v');
+    const removedProduct = await this.productModel.findByIdAndDelete(id);
     return removedProduct;
   }
 
   async removeOne(code: number) {
-    const removedProduct = await this.productModel.findOneAndDelete({ code }).select('-__v');
+    const removedProduct = await this.productModel.findOneAndDelete({ code });
     return removedProduct;
   }
 }
