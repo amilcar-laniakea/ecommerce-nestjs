@@ -27,6 +27,14 @@ export class CartsService {
 
     const carts = await this.cartModel
       .find(query)
+      .populate({
+        path: 'products.product',
+        model: 'Products',
+        populate: {
+          path: 'categories',
+          model: 'Categories',
+        },
+      })
       .skip((page - 1) * limit)
       .limit(limit)
       .select('-__v')
@@ -44,7 +52,17 @@ export class CartsService {
   }
 
   async findById(id: string): Promise<CartsDocument> {
-    const cart = await this.cartModel.findById(id).exec();
+    const cart = await this.cartModel
+      .findById(id)
+      .populate({
+        path: 'products.product',
+        model: 'Products',
+        populate: {
+          path: 'categories',
+          model: 'Categories',
+        },
+      })
+      .exec();
     return cart;
   }
 

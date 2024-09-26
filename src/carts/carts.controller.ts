@@ -113,10 +113,10 @@ export class CartsController {
 
       if (productResponse.stock < quantity) throw new BadRequestException(cartErrorCodes.ERROR_NOT_STOCK);
 
-      const productIndex = cartResponse.products.findIndex(product => product.productId.toString() === pid);
+      const productIndex = cartResponse.products.findIndex(product => product.product.toString() === pid);
 
       if (productIndex === -1) {
-        cartResponse.products.push({ productId: new Types.ObjectId(pid), quantity });
+        cartResponse.products.push({ product: new Types.ObjectId(pid), quantity });
       } else {
         cartResponse.products[productIndex].quantity += quantity;
       }
@@ -147,12 +147,12 @@ export class CartsController {
       const cartResponse = await this.cartsService.findById(cid);
       if (!cartResponse) throw new NotFoundException(cartErrorCodes.ERROR_NOT_FOUND);
 
-      const productIndex = cartResponse.products.findIndex(product => product.productId.toString() === pid);
+      const productIndex = cartResponse.products.findIndex(product => product.product.toString() === pid);
 
       if (productIndex === -1) throw new NotFoundException(cartErrorCodes.ERROR_NOT_FOUND_PRODUCT);
 
       if (quantity === 0) {
-        cartResponse.products = cartResponse.products.filter(product => product.productId.toString() !== pid);
+        cartResponse.products = cartResponse.products.filter(product => product.product.toString() !== pid);
       } else {
         if (cartResponse.products[productIndex].quantity <= quantity) {
           throw new BadRequestException(cartErrorCodes.ERROR_STOCK_CONFLICT);

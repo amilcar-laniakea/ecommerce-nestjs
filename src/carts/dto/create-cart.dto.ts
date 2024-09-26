@@ -5,7 +5,7 @@ import { CartStatus } from 'src/schemas/carts/carts.schema';
 export class CreateCartProductDto {
   @IsMongoId()
   @IsNotEmpty()
-  productId: Types.ObjectId;
+  product: Types.ObjectId;
 
   @IsNumber()
   @IsNotEmpty()

@@ -5,7 +5,7 @@ import { Products } from '../products.schema';
 @Schema()
 export class CartsProduct {
   @Prop({ type: Types.ObjectId, ref: Products.name, required: true })
-  productId: Types.ObjectId;
+  product: Types.ObjectId;
 
   @Prop({ required: false })
   quantity: number;
