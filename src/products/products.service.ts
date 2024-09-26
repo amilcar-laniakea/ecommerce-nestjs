@@ -53,7 +53,7 @@ export class ProductsService {
     const total = await this.productModel.countDocuments(query).exec();
 
     return {
-      products: products,
+      products,
       total,
       currentPage: page,
       totalPages: Math.ceil(total / limit),

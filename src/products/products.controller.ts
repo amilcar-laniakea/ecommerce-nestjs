@@ -145,6 +145,7 @@ export class ProductsController {
   async remove(@Param('id', ParseObjectIdNumberPipe) id: string, @Req() request: Request) {
     try {
       let response: null | CreateProductDto;
+
       if (!isNaN(Number(id))) {
         response = await this.productsService.removeOne(Number(id));
       } else {
